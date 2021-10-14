@@ -1,6 +1,8 @@
 def hello(name):
     print(f"{name}안녕")
 
+hello()
+
 
 
 
