@@ -1,109 +1,74 @@
-import random
-from environment import GraphicDisplay, Env
+def sey_name(name):
+    print("안녕 " + name)
+
+def sey_name1(name):
+    print(f"안녕 {name}")  #f string
+#sey_name("이경태")
+
+def Hello(name,hobby):
+    print(f"hi my name is {name},my hobby is {hobby}")
+
+#Hello("이경태","사키")
+
+def info(name,address,phone):
+    print(f"name:{name}")
+    print(f"address:{address}")
+    print(f"phone:{phone}")
+
+#info("경태","경남","010-1234-1234")
+
+def hello(name,age):
+    print(f"Hi, {name}, you are {age} years old.")
+
+def singer():
+    name1 = input("좋아하는 가수 1 :")
+    name2 = input("좋아하는 가수 2 :")
+    name3 = input("좋아하는 가수 3 :")
+    print(f"{name1},\n{name2},\n{name3},\n")
+
+#singer()
+
+# n1, n2 = map(int,input().split())
+# n1, n2 = n2, n1
+# print(n1,n2)
+
+# a = 5
+# if a >= 3:
+#     print("3이상")
+# elif a > 1:
+#     print("1초과")
+# else:
+#     print("1이하")
+
+# n1, n2 = map(int,input().split())
+# if n1 > n2:
+#     print(n1)
+# else:
+#     print(n2)
+
+# a = int(input())
+# if a >= 70:
+#     print("최우수")
+# elif a >= 50:
+#     print("우수")
+# elif a >= 20:
+#     print("보통")
+# else:
+#     print("노력 필요")
 
 
-class PolicyIteration:
-    def __init__(self, env):
-        # 환경에 대한 객체 선언
-        self.env = env
-        # 가치함수를 2차원 리스트로 초기화
-        self.value_table = [[0.0] * env.width for _ in range(env.height)]
-        # 상 하 좌 우 동일한 확률로 정책 초기화
-        self.policy_table = [[[0.25, 0.25, 0.25, 0.25]] * env.width
-                                    for _ in range(env.height)]
-        # 마침 상태의 설정
-        self.policy_table[2][2] = []
-        # 감가율
-        self.discount_factor = 0.9
+# arr = ['b','c','a','f','t','e']
+# arr.sort(reverse=True)
+# print(arr)
+# print(arr[-1])
 
-    def policy_evaluation(self):
 
-        # 다음 가치함수 초기화
-        next_value_table = [[0.00] * self.env.width
-                                    for _ in range(self.env.height)]
+# score = [55,78,99,38,87]
+# score.sort()
+# print(score[0],score[-1])
 
-        # 모든 상태에 대해서 벨만 기대방정식을 계산
-        for state in self.env.get_all_states():
-            value = 0.0
-            # 마침 상태의 가치 함수 = 0
-            if state == [2, 2]:
-                next_value_table[state[0]][state[1]] = value
-                continue
+# for i in range(1,10,1):
+#     print(i,end=" ")
 
-            # 벨만 기대 방정식
-            for action in self.env.possible_actions:
-                next_state = self.env.state_after_action(state, action)
-                reward = self.env.get_reward(state, action)
-                next_value = self.get_value(next_state)
-                value += (self.get_policy(state)[action] *
-                          (reward + self.discount_factor * next_value))
-
-            next_value_table[state[0]][state[1]] = round(value, 2)
-
-        self.value_table = next_value_table
-
-    # 현재 가치 함수에 대해서 탐욕 정책 발전
-    def policy_improvement(self):
-        next_policy = self.policy_table
-        for state in self.env.get_all_states():
-            if state == [2, 2]:
-                continue
-            value = -99999
-            max_index = []
-            # 반환할 정책 초기화
-            result = [0.0, 0.0, 0.0, 0.0]
-
-            # 모든 행동에 대해서 [보상 + (감가율 * 다음 상태 가치함수)] 계산
-            for index, action in enumerate(self.env.possible_actions):
-                next_state = self.env.state_after_action(state, action)
-                reward = self.env.get_reward(state, action)
-                next_value = self.get_value(next_state)
-                temp = reward + self.discount_factor * next_value
-
-                # 받을 보상이 최대인 행동의 index(최대가 복수라면 모두)를 추출
-                if temp == value:
-                    max_index.append(index)
-                elif temp > value:
-                    value = temp
-                    max_index.clear()
-                    max_index.append(index)
-
-            # 행동의 확률 계산
-            prob = 1 / len(max_index)
-
-            for index in max_index:
-                result[index] = prob
-
-            next_policy[state[0]][state[1]] = result
-
-        self.policy_table = next_policy
-
-    # 특정 상태에서 정책에 따른 행동을 반환
-    def get_action(self, state):
-        # 0 ~ 1 사이의 값을 무작위로 추출
-        random_pick = random.randrange(100) / 100
-
-        policy = self.get_policy(state)
-        policy_sum = 0.0
-        # 정책에 담긴 행동 중에 무작위로 한 행동을 추출
-        for index, value in enumerate(policy):
-            policy_sum += value
-            if random_pick < policy_sum:
-                return index
-
-    # 상태에 따른 정책 반환
-    def get_policy(self, state):
-        if state == [2, 2]:
-            return 0.0
-        return self.policy_table[state[0]][state[1]]
-
-    # 가치 함수의 값을 반환
-    def get_value(self, state):
-        # 소숫점 둘째 자리까지만 계산
-        return round(self.value_table[state[0]][state[1]], 2)
-
-if __name__ == "__main__":
-    env = Env()
-    policy_iteration = PolicyIteration(env)
-    grid_world = GraphicDisplay(policy_iteration)
-    grid_world.mainloop()
+for i in range(1,101,2):
+    print(i,end=" ")
